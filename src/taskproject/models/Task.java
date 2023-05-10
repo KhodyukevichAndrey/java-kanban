@@ -55,4 +55,13 @@ public class Task {
                 ", status='" + status + '\'' +
                 '}';
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
 }

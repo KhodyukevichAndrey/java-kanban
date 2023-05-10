@@ -42,8 +42,12 @@ public class TaskManager {
     }
 
     public void updateTaskStatus (Task task) {
-        int id = task.getId();
-        tasks.put(id, task);
+        for(Task task1 : tasks.values()) {
+            if(task.getName().equals(task1.getName()) || task.getDescription().equals(task1.getDescription())) {
+                int id = task1.getId();
+                tasks.put(id, task);
+            }
+        }
     }
 
     public void deleteTaskById (int taskId) {
@@ -82,7 +86,13 @@ public class TaskManager {
     }
 
     public void updateSubtask (Subtask subtask) {
-        subtasks.put(subtask.getId(), subtask);
+        for(Subtask subtask1 : subtasks.values()) {
+            if(subtask.getName().equals(subtask1.getName())
+                    || subtask.getDescription().equals(subtask1.getDescription())) {
+                int id = subtask1.getId();
+                tasks.put(id, subtask);
+            }
+        }
         updateEpicStatus(subtask.getIdEpic());
     }
 
