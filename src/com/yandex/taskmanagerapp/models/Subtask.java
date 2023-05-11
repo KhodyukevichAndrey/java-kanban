@@ -1,4 +1,4 @@
-package taskproject.models;
+package com.yandex.taskmanagerapp.models;
 
 public class Subtask extends Task{
     private int idEpic;
@@ -11,10 +11,6 @@ public class Subtask extends Task{
 
     public int getIdEpic() {
         return idEpic;
-    }
-
-    public void setIdEpic(int idEpic) {
-        this.idEpic = idEpic;
     }
 
     @Override
