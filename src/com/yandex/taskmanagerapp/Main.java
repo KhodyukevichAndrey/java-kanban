@@ -39,9 +39,6 @@ public class Main {
         System.out.println(subtask2.toString());
         System.out.println(subtask3.toString());
 
-        System.out.println(taskManager.getAllEpics());
-        System.out.println(taskManager.getAllSubtask());
-
         taskManager.deleteEpicById(epic2.getId());
         taskManager.deleteSubtaskById(subtask1.getId());
 

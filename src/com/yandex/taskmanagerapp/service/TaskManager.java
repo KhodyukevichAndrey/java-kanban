@@ -73,12 +73,11 @@ public class TaskManager {
     }
 
     public void deleteSubtaskById(int subtaskId) {
-        Subtask subtask = subtasks.get(subtaskId);
+        Subtask subtask = subtasks.remove(subtaskId);
         Epic currentEpic = epics.get(subtask.getIdEpic());
-        for (Integer epicSubtaskId : currentEpic.getEpicsSubtasksId()) {
-            currentEpic.getEpicsSubtasksId().remove(epicSubtaskId);
-        }
-        subtasks.remove(subtaskId);
+        currentEpic.getEpicsSubtasksId().remove((Integer) subtaskId); /* Кажется понял, для чего приведение
+        к Integer, спасибо ;) а то у меня от NPE уже глаз дергался, вот и пришлось выдумывать костыль,
+        чтобы исключить ошибку + Большое спасибо за статью, очень помогла в понимании итерации списка */
         updateEpicStatus(subtask.getIdEpic());
     }
 
@@ -101,24 +100,19 @@ public class TaskManager {
     }
 
     public void updateEpic(Epic epic) {
-        epics.put(epic.getId(), epic); /* Сделал аналогчно Таскам, без проверки условия,
-        но про сокращение времени на обработку понял ;) */
+        epics.put(epic.getId(), epic);
     }
 
     public void deleteEpicById(int epicId) {
-        Epic epic = epics.get(epicId);
+        Epic epic = epics.remove(epicId);
         for (Integer subtaskId : epic.getEpicsSubtasksId()) {
             subtasks.remove(subtaskId);
         }
-        epics.remove(epicId);
     }
 
     public ArrayList<Subtask> getEpicsSubtasks(int epicId) {
         ArrayList<Subtask> currentEpicsSubtasks = new ArrayList<>();
-        for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) { // оптимальное итерирование
-            if(subtasks.get(subtaskId) == null) {
-                continue;
-            }
+        for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) {
             currentEpicsSubtasks.add(subtasks.get(subtaskId));
         }
         return currentEpicsSubtasks;
@@ -129,15 +123,8 @@ public class TaskManager {
         Epic currentEpic = epics.get(epicId);
         for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) {
             Subtask subtask = subtasks.get(subtaskId);
-            if (subtask == null) { /* Пришлось добавить данную проверку, т.к. сначала удаляется сабтаска,
-                                   а потом апдейт пытается ее из списка сабтасек получить, и не находит
-                                   (можно было еще реализовать через contains, но показалось с нулл получше выглядит */
-                continue;
-            }
-            if (subtask.getIdEpic() == epicId) {
-                    statuses.add(subtask.getStatus());
-                }
-            }
+            statuses.add(subtask.getStatus());
+        }
         if(statuses.size() > 1 || statuses.contains("IN_PROGRESS")) {
             currentEpic.setStatus("IN_PROGRESS");
         } else if (statuses.contains("NEW") || statuses.isEmpty()) {
@@ -151,5 +138,4 @@ public class TaskManager {
     private int generateId() {
         return ++newId;
     }
-
 }
