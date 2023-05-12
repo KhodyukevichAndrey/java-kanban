@@ -1,8 +1,8 @@
 package com.yandex.taskmanagerapp.service;
 
-import com.yandex.taskmanagerapp.models.Epic;
-import com.yandex.taskmanagerapp.models.Subtask;
-import com.yandex.taskmanagerapp.models.Task;
+import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Subtask;
+import com.yandex.taskmanagerapp.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ public class TaskManager {
     private HashMap<Integer, Epic> epics = new HashMap<>();
 
     public ArrayList<Task> getAllTask() {                                   // Tasks //
-        return new ArrayList<Task>(tasks.values());
+        return new ArrayList<>(tasks.values());
     }
 
     public void deleteAllTask() {
@@ -33,13 +33,8 @@ public class TaskManager {
         tasks.put(id, task);
     }
 
-    public void updateTaskStatus(Task task) {
-        for (Task task1 : tasks.values()) {
-            if (task.getName().equals(task1.getName()) || task.getDescription().equals(task1.getDescription())) {
-                int id = task1.getId();
-                tasks.put(id, task);
-            }
-        }
+    public void updateTask(Task task) {
+        tasks.put(task.getId(), task);
     }
 
     public void deleteTaskById(int taskId) {
@@ -47,7 +42,7 @@ public class TaskManager {
     }
 
     public ArrayList<Subtask> getAllSubtask() {                            // Subtasks //
-        return new ArrayList<Subtask>(subtasks.values());
+        return new ArrayList<>(subtasks.values());
     }
 
     public void deleteAllSubtask() {
@@ -73,24 +68,22 @@ public class TaskManager {
     }
 
     public void updateSubtask(Subtask subtask) {
-        for (Subtask subtask1 : subtasks.values()) {
-            if (subtask.getName().equals(subtask1.getName())
-                    || subtask.getDescription().equals(subtask1.getDescription())) {
-                int id = subtask1.getId();
-                tasks.put(id, subtask);
-            }
-        }
+        subtasks.put(subtask.getId(), subtask);
         updateEpicStatus(subtask.getIdEpic());
     }
 
     public void deleteSubtaskById(int subtaskId) {
         Subtask subtask = subtasks.get(subtaskId);
+        Epic currentEpic = epics.get(subtask.getIdEpic());
+        for (Integer epicSubtaskId : currentEpic.getEpicsSubtasksId()) {
+            currentEpic.getEpicsSubtasksId().remove(epicSubtaskId);
+        }
         subtasks.remove(subtaskId);
         updateEpicStatus(subtask.getIdEpic());
     }
 
     public ArrayList<Epic> getAllEpics() {                               //EPIC
-        return new ArrayList<Epic>(epics.values());
+        return new ArrayList<>(epics.values());
     }
 
     public void deleteAllEpics() {
@@ -98,7 +91,7 @@ public class TaskManager {
         deleteAllSubtask();
     }
 
-    public Epic getEpicByid(int epicId) {
+    public Epic getEpicById(int epicId) {
         return epics.get(epicId);
     }
 
@@ -108,39 +101,43 @@ public class TaskManager {
     }
 
     public void updateEpic(Epic epic) {
-        for (Integer epicId : epics.keySet()) {
-            if (epic.getId() == epicId) {
-                epics.put(epicId, epic);
-            }
-        }
+        epics.put(epic.getId(), epic); /* Сделал аналогчно Таскам, без проверки условия,
+        но про сокращение времени на обработку понял ;) */
     }
 
     public void deleteEpicById(int epicId) {
+        Epic epic = epics.get(epicId);
+        for (Integer subtaskId : epic.getEpicsSubtasksId()) {
+            subtasks.remove(subtaskId);
+        }
         epics.remove(epicId);
     }
 
     public ArrayList<Subtask> getEpicsSubtasks(int epicId) {
         ArrayList<Subtask> currentEpicsSubtasks = new ArrayList<>();
-        for (Subtask currentSubtask : subtasks.values()) {
-            if (currentSubtask.getIdEpic() == epicId) {
-                currentEpicsSubtasks.add(currentSubtask);
+        for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) { // оптимальное итерирование
+            if(subtasks.get(subtaskId) == null) {
+                continue;
             }
+            currentEpicsSubtasks.add(subtasks.get(subtaskId));
         }
         return currentEpicsSubtasks;
     }
 
-    private void updateEpicStatus(int idEpic) {
+    private void updateEpicStatus(int epicId) {
         HashSet<String> statuses = new HashSet<>();
-        /* HashSet не было в теории, погуглил :)
-        вроде +- понял, реализовал в таком виде,
-        но возможно можно это сделать проще */
-        Epic currentEpic = epics.get(idEpic);
-        for (Integer idSubtasks : subtasks.keySet()) {
-            Subtask subtask = subtasks.get(idSubtasks);
-            if (subtask.getIdEpic() == idEpic) {
-                statuses.add(subtask.getStatus());
+        Epic currentEpic = epics.get(epicId);
+        for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) {
+            Subtask subtask = subtasks.get(subtaskId);
+            if (subtask == null) { /* Пришлось добавить данную проверку, т.к. сначала удаляется сабтаска,
+                                   а потом апдейт пытается ее из списка сабтасек получить, и не находит
+                                   (можно было еще реализовать через contains, но показалось с нулл получше выглядит */
+                continue;
             }
-        }
+            if (subtask.getIdEpic() == epicId) {
+                    statuses.add(subtask.getStatus());
+                }
+            }
         if(statuses.size() > 1 || statuses.contains("IN_PROGRESS")) {
             currentEpic.setStatus("IN_PROGRESS");
         } else if (statuses.contains("NEW") || statuses.isEmpty()) {

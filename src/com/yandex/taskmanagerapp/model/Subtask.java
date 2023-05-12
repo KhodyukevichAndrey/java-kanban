@@ -1,7 +1,7 @@
-package com.yandex.taskmanagerapp.models;
+package com.yandex.taskmanagerapp.model;
 
 public class Subtask extends Task{
-    private int idEpic;
+    private final int idEpic;
 
 
     public Subtask(String name, String description, String status, int idEpic) {
