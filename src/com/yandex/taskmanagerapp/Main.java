@@ -1,51 +1,40 @@
 package com.yandex.taskmanagerapp;
 
-import com.yandex.taskmanagerapp.model.Task; // импорты для тестов
-import com.yandex.taskmanagerapp.model.Subtask;
 import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Subtask;
+import com.yandex.taskmanagerapp.model.Task;
+import com.yandex.taskmanagerapp.service.Managers;
 import com.yandex.taskmanagerapp.service.TaskManager;
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
 
-        // - Шаблоны для тестов, на случай если пригодяться
+        Managers managers = new Managers();
+        TaskManager inMemoryTaskManager = managers.getDefault();
 
-        Task task1 = new Task("Помыть посуду", "Положить в посудомойку" , "NEW");
+        Task task1 = new Task("Таск1", "Положить в посудомойку" , Statuses.NEW);
+        inMemoryTaskManager.addNewTask(task1);
 
-        taskManager.addNewTask(task1);
+        Epic epic1 = new Epic("Эпик1","Сбор вещей");
+        Epic epic2 = new Epic("Эпик2", "Навести порядок");
 
-        Epic epic1 = new Epic("Переезд","Сбор вещей");
-        Epic epic2 = new Epic("Уборка", "Навести порядок");
+        inMemoryTaskManager.addNewEpic(epic1);
+        inMemoryTaskManager.addNewEpic(epic2);
 
-        taskManager.addNewEpic(epic1);
-        taskManager.addNewEpic(epic2);
+        Subtask subtask1 = new Subtask("1", "Сбор одежды", Statuses.DONE, epic1.getId());
+        Subtask subtask2 = new Subtask("2", "Сбор документов", Statuses.DONE, epic1.getId());
+        Subtask subtask3 = new Subtask("3", "Пропылесосить", Statuses.NEW, epic2.getId());
 
-        Subtask subtask1;
-        subtask1 = new Subtask("Сбор вещей", "Сбор одежды", "DONE", epic1.getId());
-        Subtask subtask2;
-        subtask2 = new Subtask("Сбор вещей", "Сбор документов", "NEW", epic1.getId());
-        Subtask subtask3;
-        subtask3 = new Subtask("Уборка", "Пропылесосить", "IN_PROGRESS", epic2.getId());
+        inMemoryTaskManager.addNewSubtask(subtask1);
+        inMemoryTaskManager.addNewSubtask(subtask2);
+        inMemoryTaskManager.addNewSubtask(subtask3);
 
-        taskManager.addNewSubtask(subtask1);
-        taskManager.addNewSubtask(subtask2);
-        taskManager.addNewSubtask(subtask3);
+        System.out.println(inMemoryTaskManager.getEpicsSubtasks(epic2.getId()));
+        System.out.println(inMemoryTaskManager.getEpicById(epic1.getId()));
+        System.out.println(inMemoryTaskManager.getSubtaskById(subtask2.getId()));
 
-        System.out.println(epic1.toString());
-        System.out.println(epic2.toString());
-        System.out.println(subtask1.toString());
-        System.out.println(subtask2.toString());
-        System.out.println(subtask3.toString());
-
-        taskManager.deleteEpicById(epic2.getId());
-        taskManager.deleteSubtaskById(subtask1.getId());
-
-        System.out.println(taskManager.getAllEpics());
-        System.out.println(taskManager.getAllSubtask());
-        System.out.println(taskManager.getEpicsSubtasks(epic1.getId()));
-        System.out.println(taskManager.getSubtaskById(subtask2.getId()));
-        System.out.println(taskManager.getEpicById(epic1.getId()));
+        System.out.println(Managers.getDefaultHistory());
     }
 }
