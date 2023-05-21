@@ -11,8 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Managers managers = new Managers();
-        TaskManager inMemoryTaskManager = managers.getDefault();
+        TaskManager inMemoryTaskManager = Managers.getDefault();
 
         Task task1 = new Task("Таск1", "Положить в посудомойку" , Statuses.NEW);
         inMemoryTaskManager.addNewTask(task1);
@@ -34,7 +33,9 @@ public class Main {
         System.out.println(inMemoryTaskManager.getEpicsSubtasks(epic2.getId()));
         System.out.println(inMemoryTaskManager.getEpicById(epic1.getId()));
         System.out.println(inMemoryTaskManager.getSubtaskById(subtask2.getId()));
+        inMemoryTaskManager.getSubtaskById(subtask2.getId());
+        inMemoryTaskManager.getSubtaskById(subtask3.getId());
 
-        System.out.println(Managers.getDefaultHistory());
+        System.out.println(inMemoryTaskManager.getHistory());
     }
 }

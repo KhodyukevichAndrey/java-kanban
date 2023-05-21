@@ -5,20 +5,18 @@ import com.yandex.taskmanagerapp.model.Statuses;
 import com.yandex.taskmanagerapp.model.Subtask;
 import com.yandex.taskmanagerapp.model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
+    private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
     private int newId = 0;
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<Integer, Subtask> subtasks = new HashMap<>();
+    private final Map<Integer, Epic> epics = new HashMap<>();
 
     @Override
-    public ArrayList<Task> getAllTask() {                                   // Tasks //
+    public List<Task> getAllTask() {                                   // Tasks //
         return new ArrayList<>(tasks.values());
     }
 
@@ -29,8 +27,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int taskId) {
-        inMemoryHistoryManager.addTaskToHistory(tasks.get(taskId));
-        return tasks.get(taskId);
+        Task task = tasks.get(taskId);
+        inMemoryHistoryManager.addTaskToHistory(task);
+        return task;
     }
 
     @Override
@@ -51,7 +50,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Subtask> getAllSubtask() {                            // Subtasks //
+    public List<Subtask> getAllSubtask() {                            // Subtasks //
         return new ArrayList<>(subtasks.values());
     }
 
@@ -66,8 +65,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask getSubtaskById(int subtaskId) {
-        inMemoryHistoryManager.addTaskToHistory(subtasks.get(subtaskId));
-        return subtasks.get(subtaskId);
+        Subtask subtask = subtasks.get(subtaskId);
+        inMemoryHistoryManager.addTaskToHistory(subtask);
+        return subtask;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = subtask.getId();
         subtasks.put(id, subtask);
         Epic currentEpic = epics.get(subtask.getIdEpic());
-        ArrayList<Integer> epicSubtasksId = currentEpic.getEpicsSubtasksId();
+        List<Integer> epicSubtasksId = currentEpic.getEpicsSubtasksId();
         epicSubtasksId.add(id);
         updateEpicStatus(subtask.getIdEpic());
     }
@@ -96,7 +96,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Epic> getAllEpics() {                               //EPIC
+    public List<Epic> getAllEpics() {                               //EPIC
         return new ArrayList<>(epics.values());
     }
 
@@ -108,8 +108,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicById(int epicId) {
-        inMemoryHistoryManager.addTaskToHistory(epics.get(epicId));
-        return epics.get(epicId);
+        Epic epic = epics.get(epicId);
+        inMemoryHistoryManager.addTaskToHistory(epic);
+        return epic;
     }
 
     @Override
@@ -132,12 +133,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Subtask> getEpicsSubtasks(int epicId) {
-        ArrayList<Subtask> currentEpicsSubtasks = new ArrayList<>();
+    public List<Subtask> getEpicsSubtasks(int epicId) {
+        List<Subtask> currentEpicsSubtasks = new ArrayList<>();
         for (Integer subtaskId : epics.get(epicId).getEpicsSubtasksId()) {
             currentEpicsSubtasks.add(subtasks.get(subtaskId));
         }
         return currentEpicsSubtasks;
+    }
+
+    @Override public List<Task> getHistory() {
+        return inMemoryHistoryManager.getHistory();
     }
 
     private void updateEpicStatus(int epicId) {

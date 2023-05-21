@@ -1,9 +1,10 @@
 package com.yandex.taskmanagerapp.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task{
-    private final ArrayList<Integer> epicsSubtasksId = new ArrayList<>();
+    private final List<Integer> epicsSubtasksId = new ArrayList<>();
 
     public Epic(String name, String description) {
         super(name, description, Statuses.NEW);
@@ -14,7 +15,7 @@ public class Epic extends Task{
         return "Epic{" + super.toString() + "}";
     }
 
-    public ArrayList<Integer> getEpicsSubtasksId() {
+    public List<Integer> getEpicsSubtasksId() {
         return epicsSubtasksId;
     }
 }
