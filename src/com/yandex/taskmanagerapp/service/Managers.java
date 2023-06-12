@@ -9,8 +9,7 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static HistoryManager getDefaultHistory() { /* тоже подумал странно возвращать список,
-    но смутила немного формулировка ТЗ */
+    public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 }
