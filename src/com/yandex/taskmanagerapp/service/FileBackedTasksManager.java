@@ -141,27 +141,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String[] elements = value.split(",");
         Statuses status = Statuses.valueOf(elements[3]);
         int id = Integer.parseInt(elements[1]);
+        if(super.getNewId() < id) {
+            super.setNewId(id);
+        }
         if (elements[0].equals("TASK")) {
             Task task = new Task(elements[2], elements[4], status);
             task.setId(id);
-            if(super.getNewId() < id) {
-                super.setNewId(id);
-            }
             return task;
         } else if (elements[0].equals("SUBTASK")) {
             int epicId = Integer.parseInt(elements[5]);
             Subtask subtask = new Subtask(elements[2], elements[4], status, epicId);
             subtask.setId(id);
-            if(super.getNewId() < id) {
-                super.setNewId(id);
-            }
             return subtask;
         } else {
             Epic epic = new Epic(elements[2], elements[4]);
             epic.setId(id);
-            if(super.getNewId() < id) {
-                super.setNewId(id);
-            }
             return epic;
         }
     }
