@@ -17,6 +17,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         Epic epic1 = new Epic("epicName1","description1");
         Epic epic2 = new Epic("epicName2", "description2");
+        Epic epic3 = new Epic("epicName3", "description3");
 
         fileBackedTasksManager.addNewEpic(epic1);
         fileBackedTasksManager.addNewEpic(epic2);
@@ -28,6 +29,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         fileBackedTasksManager.addNewSubtask(subtask1);
         fileBackedTasksManager.addNewSubtask(subtask2);
         fileBackedTasksManager.addNewSubtask(subtask3);
+        fileBackedTasksManager.addNewEpic(epic3);
 
         System.out.println(fileBackedTasksManager.getEpicById(epic1.getId()));
         System.out.println(fileBackedTasksManager.getEpicById(epic2.getId()));
@@ -138,24 +140,28 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public Task taskFromString(String value) {
         String[] elements = value.split(",");
         Statuses status = Statuses.valueOf(elements[3]);
+        int id = Integer.parseInt(elements[1]);
         if (elements[0].equals("TASK")) {
             Task task = new Task(elements[2], elements[4], status);
-            int id = Integer.parseInt(elements[1]);
             task.setId(id);
-            super.setNewId(id);
+            if(super.getNewId() < id) {
+                super.setNewId(id);
+            }
             return task;
         } else if (elements[0].equals("SUBTASK")) {
             int epicId = Integer.parseInt(elements[5]);
             Subtask subtask = new Subtask(elements[2], elements[4], status, epicId);
-            int id = Integer.parseInt(elements[1]);
             subtask.setId(id);
-            super.setNewId(id);
+            if(super.getNewId() < id) {
+                super.setNewId(id);
+            }
             return subtask;
         } else {
             Epic epic = new Epic(elements[2], elements[4]);
-            int id = Integer.parseInt(elements[1]);
             epic.setId(id);
-            super.setNewId(id);
+            if(super.getNewId() < id) {
+                super.setNewId(id);
+            }
             return epic;
         }
     }
