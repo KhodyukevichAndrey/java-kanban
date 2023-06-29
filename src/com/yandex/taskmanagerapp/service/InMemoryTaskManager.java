@@ -37,7 +37,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewTask(Task task) {
-        task.setId(generateId());
+        if(task.getId() == 0) {
+            task.setId(generateId());
+        }
         int id = task.getId();
         tasks.put(id, task);
     }
@@ -79,7 +81,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewSubtask(Subtask subtask) {
-        subtask.setId(generateId());
+        if(subtask.getId() == 0) {
+            subtask.setId(generateId());
+        }
         int id = subtask.getId();
         subtasks.put(id, subtask);
         Epic currentEpic = epics.get(subtask.getIdEpic());
@@ -126,7 +130,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewEpic(Epic epic) {
-        epic.setId(generateId());
+        if(epic.getId() == 0) {
+            epic.setId(generateId());
+        }
         epics.put(epic.getId(), epic);
     }
 
@@ -159,6 +165,11 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
     private void updateEpicStatus(int epicId) {
         HashSet<Statuses> statuses = new HashSet<>();
         Epic currentEpic = epics.get(epicId);
@@ -178,5 +189,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int generateId() {
         return ++newId;
+    }
+
+    public void setNewId(int newId) {
+        this.newId = newId;
     }
 }
