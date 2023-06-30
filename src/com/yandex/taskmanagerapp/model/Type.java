@@ -1,6 +1,6 @@
 package com.yandex.taskmanagerapp.model;
 
-public enum Types {
+public enum Type {
     TASK,
     SUBTASK,
     EPIC

@@ -9,11 +9,11 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
-    private int newId = 0;
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected int newId = 0;
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
 
     @Override
     public List<Task> getAllTask() {                                   // Tasks //
@@ -37,9 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewTask(Task task) {
-        if(task.getId() == 0) {
-            task.setId(generateId());
-        }
+        task.setId(generateId());
         int id = task.getId();
         tasks.put(id, task);
     }
@@ -81,9 +79,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewSubtask(Subtask subtask) {
-        if(subtask.getId() == 0) {
-            subtask.setId(generateId());
-        }
+        subtask.setId(generateId());
         int id = subtask.getId();
         subtasks.put(id, subtask);
         Epic currentEpic = epics.get(subtask.getIdEpic());
@@ -130,9 +126,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewEpic(Epic epic) {
-        if(epic.getId() == 0) {
-            epic.setId(generateId());
-        }
+        epic.setId(generateId());
         epics.put(epic.getId(), epic);
     }
 
@@ -189,13 +183,5 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int generateId() {
         return ++newId;
-    }
-
-    public void setNewId(int newId) {
-        this.newId = newId;
-    }
-
-    public int getNewId() {
-        return newId;
     }
 }

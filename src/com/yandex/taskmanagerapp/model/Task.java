@@ -62,4 +62,7 @@ public class Task {
         return description;
     }
 
+    public Type getType() {
+        return Type.TASK;
+    }
 }
