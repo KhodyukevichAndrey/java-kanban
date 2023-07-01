@@ -11,12 +11,17 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
+    private final File file;
     private static final String HEADLINE = "type,id,name,status,description,epicId";
+
+    public FileBackedTasksManager(File file) {
+        this.file = file;
+    }
 
     public static void main (String[] args) {
 
         File file = new File("tasksFile.csv");
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
 
         Epic epic1 = new Epic("epicName1","description1");
         Epic epic2 = new Epic("epicName2", "description2");
@@ -144,50 +149,39 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
-    public FileBackedTasksManager loadFromFile(File file) {
+    public static FileBackedTasksManager loadFromFile(File file) {
         List<String> allLinesOfFile = new ArrayList<>();
-        FileBackedTasksManager fb = new FileBackedTasksManager();
+        FileBackedTasksManager fb = new FileBackedTasksManager(file);
         try(BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
             while(br.ready()) {
                 String line = br.readLine();
                 allLinesOfFile.add(line);
+                Task taskFromFile = fb.taskFromString(line);
+                if (taskFromFile != null) {
+                    switch (taskFromFile.getType()) {
+                        case TASK:
+                            fb.tasks.put(taskFromFile.getId(), taskFromFile);
+                            break;
+                        case SUBTASK:
+                            Subtask subtask = (Subtask) taskFromFile;
+                            fb.subtasks.put(taskFromFile.getId(), subtask);
+                            fb.epics.get(subtask.getIdEpic()).getEpicsSubtasksId().add(subtask.getId());
+                            break;
+                        case EPIC:
+                            fb.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
+                            break;
+                    }
+                }
             }
-
             if(allLinesOfFile.isEmpty()) {
-                return new FileBackedTasksManager();
-            } else {
-                for (String line : allLinesOfFile) {
-                    Task taskFromFile = fb.taskFromString(line);
-                    if(taskFromFile != null) {
-                        switch (taskFromFile.getType()) {
-                            case TASK:
-                                fb.tasks.put(taskFromFile.getId(), taskFromFile);
-                                break;
-                            case SUBTASK:
-                                fb.subtasks.put(taskFromFile.getId(), (Subtask) taskFromFile);
-                                break;
-                            case EPIC:
-                                fb.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
-                                break;
-                        }
-                    }
-                }
-                for (Epic epic : fb.epics.values()) {
-                    List<Integer> epicSubtasksId = epic.getEpicsSubtasksId();
-                    for(Subtask subtask : fb.subtasks.values()) {
-                        if(subtask.getIdEpic() == epic.getId()) {
-                            epicSubtasksId.add(subtask.getId());
-                        }
-                    }
-                }
-
-                String historyLine = allLinesOfFile.get(allLinesOfFile.size() - 1);
-                List<Integer> history = fb.historyFromString(historyLine);
-                for (Integer id : history) {
-                    fb.historyManager.addTaskToHistory(fb.tasks.get(id));
-                    fb.historyManager.addTaskToHistory(fb.subtasks.get(id));
-                    fb.historyManager.addTaskToHistory(fb.epics.get(id));
-                }
+                return fb;
+            }
+            String historyLine = allLinesOfFile.get(allLinesOfFile.size() - 1);
+            List<Integer> history = fb.historyFromString(historyLine);
+            for (Integer id : history) {
+                fb.historyManager.addTaskToHistory(fb.tasks.get(id));
+                fb.historyManager.addTaskToHistory(fb.subtasks.get(id));
+                fb.historyManager.addTaskToHistory(fb.epics.get(id));
             }
         } catch (IOException exception) {
             throw new ManagerSaveException("Невозможно прочитать файл");
@@ -198,7 +192,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private void save() {
         List<String> convertedTasksToLines = convertTaskToLines(); // вынес в отдельный метод
 
-        try(Writer writer = new FileWriter("tasksFile.csv")) {
+        try(Writer writer = new FileWriter(file)) {
             writer.write(HEADLINE);
             for(String taskInLine : convertedTasksToLines) {
                 writer.write("\n" + taskInLine);
@@ -270,10 +264,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private List<Integer> historyFromString(String value) {
-        String[] historyElements = value.split(",");
         List<Integer> history = new ArrayList<>();
-        for (String element : historyElements) {
-            history.add(Integer.parseInt(element));
+        if(!value.isBlank()) {
+            String[] historyElements = value.split(",");
+            for (String element : historyElements) {
+                history.add(Integer.parseInt(element));
+            }
         }
         return history;
     }
