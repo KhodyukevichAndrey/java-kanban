@@ -1,5 +1,6 @@
 package com.yandex.taskmanagerapp.model;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task{
@@ -11,13 +12,18 @@ public class Subtask extends Task{
         this.idEpic = idEpic;
     }
 
+    public Subtask(String name, String description, Statuses status, int duration, LocalDateTime startTime, int idEpic) {
+        super(name, description, status, duration, startTime);
+        this.idEpic = idEpic;
+    }
+
     public int getIdEpic() {
         return idEpic;
     }
 
     @Override
     public String toString() {
-        return super.toString() + idEpic;
+        return super.toString() + "," + idEpic;
     }
 
     @Override

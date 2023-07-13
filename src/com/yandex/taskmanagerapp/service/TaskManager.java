@@ -5,6 +5,7 @@ import com.yandex.taskmanagerapp.model.Subtask;
 import com.yandex.taskmanagerapp.model.Task;
 
 import java.util.List;
+import java.util.TreeSet;
 
 public interface TaskManager {
     List<Task> getAllTask();
@@ -46,4 +47,6 @@ public interface TaskManager {
     List<Subtask> getEpicsSubtasks(int epicId);
 
     List<Task> getHistory();
+
+    TreeSet<Task> getPrioritySet();
 }

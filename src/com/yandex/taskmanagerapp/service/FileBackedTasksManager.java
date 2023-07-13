@@ -5,6 +5,7 @@ import com.yandex.taskmanagerapp.model.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final File file;
-    private static final String HEADLINE = "type,id,name,status,description,epicId";
+    private static final String HEADLINE = "type,id,name,status,description,duration,startTime,epicId/endTime";
 
     public FileBackedTasksManager(File file) {
         this.file = file;
@@ -22,37 +23,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
         File file = new File("tasksFile.csv");
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
-
-        Epic epic1 = new Epic("epicName1","description1");
-        Epic epic2 = new Epic("epicName2", "description2");
-        Epic epic3 = new Epic("epicName3", "description3");
-
-        fileBackedTasksManager.addNewEpic(epic1);
-        fileBackedTasksManager.addNewEpic(epic2);
-        fileBackedTasksManager.addNewEpic(epic3);
-
-        Subtask subtask1 = new Subtask("SubtaskName1", "description1", Statuses.DONE, epic1.getId());
-        Subtask subtask2 = new Subtask("SubtaskName2", "description2", Statuses.DONE, epic2.getId());
-        Subtask subtask3 = new Subtask("SubtaskName3", "description3", Statuses.NEW, epic2.getId());
-
-        fileBackedTasksManager.addNewSubtask(subtask1);
-        fileBackedTasksManager.addNewSubtask(subtask2);
-        fileBackedTasksManager.addNewSubtask(subtask3);
-
-
-        fileBackedTasksManager.getEpicById(epic1.getId());
-        fileBackedTasksManager.getEpicById(epic2.getId());
-        fileBackedTasksManager.getSubtaskById(subtask1.getId());
-        fileBackedTasksManager.getSubtaskById(subtask2.getId());
-
-        FileBackedTasksManager loadFromFile = Managers.loadFileBackedTasksManager(file);
-
-        System.out.println(fileBackedTasksManager.tasks.equals(loadFromFile.tasks));
-        System.out.println(fileBackedTasksManager.subtasks.equals(loadFromFile.subtasks));
-        System.out.println(fileBackedTasksManager.epics.equals(loadFromFile.epics));
-        System.out.println(fileBackedTasksManager.getHistory().equals(loadFromFile.getHistory()));
-        System.out.println(fileBackedTasksManager.newId == loadFromFile.newId);
-
 
     }
 
@@ -217,23 +187,34 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String taskName = elements[2];
         Statuses status = Statuses.valueOf(elements[3]);
         String taskDescription = elements[4];
+        int duration = Integer.parseInt(elements[5]);
+        LocalDateTime startTime = null;
+        if(!elements[6].contains("null")) {
+            startTime = LocalDateTime.parse(elements[6]);
+        }
+
         if (newId < id) {
             newId = id;
         }
         switch (type) {
             case TASK:
-                Task task = new Task(taskName, taskDescription, status);
+                Task task = new Task(taskName, taskDescription, status, duration, startTime);
                 task.setId(id);
                 return task;
             case SUBTASK:
-                int epicId = Integer.parseInt(elements[5]);
-                Subtask subtask = new Subtask(taskName, taskDescription, status, epicId);
+                int epicId = Integer.parseInt(elements[7]);
+                Subtask subtask = new Subtask(taskName, taskDescription, status, duration, startTime, epicId);
                 subtask.setId(id);
                 return subtask;
             case EPIC:
                 Epic epic = new Epic(taskName, taskDescription);
                 epic.setStatus(status);
                 epic.setId(id);
+                epic.setDuration(duration);
+                epic.setStartTime(startTime);
+                if(!elements[7].contains("null")) {
+                    epic.setEndTime(LocalDateTime.parse(elements[8]));
+                }
                 return epic;
         }
         return null;
