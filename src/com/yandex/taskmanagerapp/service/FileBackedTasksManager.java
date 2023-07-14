@@ -213,7 +213,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 epic.setDuration(duration);
                 epic.setStartTime(startTime);
                 if(!elements[7].contains("null")) {
-                    epic.setEndTime(LocalDateTime.parse(elements[8]));
+                    epic.setEndTime(LocalDateTime.parse(elements[7]));
                 }
                 return epic;
         }

@@ -27,9 +27,9 @@ public class InMemoryTaskManager implements TaskManager {
                 return 0;
             } else return 1;
         } else if (first == null) {
-            return -1;
-        } else {
             return 1;
+        } else {
+            return -1;
         }
     };
     protected final TreeSet<Task> prioritizedTasks = new TreeSet<>(comparator);
@@ -251,7 +251,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void updateEpicStartAndEndTime(int epicId) {
-        Epic currentEpic = getEpicById(epicId);
+        Epic currentEpic = epics.get(epicId);
 
         Optional<LocalDateTime> firstSubtaskStartTime = getFirstSubtaskByStartTime(epicId);
 

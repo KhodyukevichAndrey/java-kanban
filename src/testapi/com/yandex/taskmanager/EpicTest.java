@@ -1,5 +1,8 @@
-package com.yandex.taskmanagerapp.model;
+package testapi.com.yandex.taskmanager;
 
+import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Subtask;
 import com.yandex.taskmanagerapp.service.InMemoryTaskManager;
 import com.yandex.taskmanagerapp.service.TaskManager;
 import org.junit.jupiter.api.BeforeEach;

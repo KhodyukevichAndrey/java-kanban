@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
-    private final String name;
+    private String name;
     private final String description;
     private int id;
     private Statuses status;
@@ -100,5 +100,9 @@ public class Task {
             return startTime.plus(Duration.ofMinutes(duration));
         }
         return null;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
