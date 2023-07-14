@@ -308,7 +308,6 @@ abstract class AbstractTaskManagerTest<T extends TaskManager> {
         TreeSet<Task> prioritizedSet = taskManager.getPrioritySet();
 
         assertNotNull(prioritizedSet, "Должно быть возвращено множество");
-        System.out.println(taskManager.getPrioritySet());
         assertEquals(task1, taskManager.getPrioritySet().first(),
                 "Должна быть возвращена задача, с самой раней датой старта");
     }
