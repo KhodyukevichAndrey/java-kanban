@@ -1,8 +1,11 @@
-package testapi.com.yandex.taskmanager;
+package com.yandex.taskmanager;
 
-import com.yandex.taskmanagerapp.model.*;
-import com.yandex.taskmanagerapp.service.*;
 import org.junit.jupiter.api.Test;
+import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Subtask;
+import com.yandex.taskmanagerapp.model.Task;
+import com.yandex.taskmanagerapp.service.TaskManager;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -305,10 +308,10 @@ abstract class AbstractTaskManagerTest<T extends TaskManager> {
 
     @Test
     void shouldReturnPrioritySet() {
-        TreeSet<Task> prioritizedSet = taskManager.getPrioritySet();
+        TreeSet<Task> prioritizedSet = taskManager.getPriorityTasks();
 
         assertNotNull(prioritizedSet, "Должно быть возвращено множество");
-        assertEquals(task1, taskManager.getPrioritySet().first(),
+        assertEquals(task1, taskManager.getPriorityTasks().first(),
                 "Должна быть возвращена задача, с самой раней датой старта");
     }
 }

@@ -1,14 +1,16 @@
 package com.yandex.taskmanagerapp.service;
 
+
 import java.io.File;
+import java.net.URI;
 
 public class Managers {
 
     private Managers() {
     }
 
-    public static TaskManager getDefault() {
-        return new InMemoryTaskManager();
+    public static TaskManager getDefault(URI url) {
+        return new HttpTaskManager(url);
     }
 
     public static HistoryManager getDefaultHistory() {

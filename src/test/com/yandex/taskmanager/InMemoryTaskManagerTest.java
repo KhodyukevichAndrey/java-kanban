@@ -1,8 +1,11 @@
-package testapi.com.yandex.taskmanager;
+package com.yandex.taskmanager;
 
-import com.yandex.taskmanagerapp.model.*;
-import com.yandex.taskmanagerapp.service.*;
+import com.yandex.taskmanagerapp.service.InMemoryTaskManager;
 import org.junit.jupiter.api.BeforeEach;
+import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Subtask;
+import com.yandex.taskmanagerapp.model.Task;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +15,7 @@ public class InMemoryTaskManagerTest extends AbstractTaskManagerTest {
 
     @BeforeEach
     void testEnvironment() {
-        taskManager = Managers.getDefault();
+        taskManager = new InMemoryTaskManager();
 
         assertTrue(taskManager.getAllTask().isEmpty(),
                 "Список задач должен быть пустым после инициализации");

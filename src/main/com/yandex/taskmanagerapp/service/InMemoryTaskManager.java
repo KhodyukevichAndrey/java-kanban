@@ -203,7 +203,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public TreeSet<Task> getPrioritySet() {
+    public TreeSet<Task> getPriorityTasks() {
         return prioritizedTasks;
     }
 

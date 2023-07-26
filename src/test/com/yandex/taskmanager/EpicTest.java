@@ -1,4 +1,4 @@
-package testapi.com.yandex.taskmanager;
+package com.yandex.taskmanager;
 
 import com.yandex.taskmanagerapp.model.Epic;
 import com.yandex.taskmanagerapp.model.Statuses;

@@ -1,10 +1,15 @@
-package testapi.com.yandex.taskmanager;
+package com.yandex.taskmanager;
 
-import com.yandex.taskmanagerapp.model.*;
-import com.yandex.taskmanagerapp.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import com.yandex.taskmanagerapp.model.Epic;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Subtask;
+import com.yandex.taskmanagerapp.model.Task;
+import com.yandex.taskmanagerapp.service.FileBackedTasksManager;
+import com.yandex.taskmanagerapp.service.Managers;
+import com.yandex.taskmanagerapp.service.TaskManager;
 
 import java.io.File;
 import java.time.LocalDateTime;

@@ -12,18 +12,14 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final File file;
+    private File file;
     private static final String HEADLINE = "type,id,name,status,description,duration,startTime,epicId/endTime";
+
+    public FileBackedTasksManager() {
+    }
 
     public FileBackedTasksManager(File file) {
         this.file = file;
-    }
-
-    public static void main (String[] args) {
-
-        File file = new File("tasksFile.csv");
-        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
-
     }
 
     @Override
@@ -131,11 +127,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     switch (taskFromFile.getType()) {
                         case TASK:
                             fb.tasks.put(taskFromFile.getId(), taskFromFile);
+                            fb.prioritizedTasks.add(taskFromFile);
                             break;
                         case SUBTASK:
                             Subtask subtask = (Subtask) taskFromFile;
                             fb.subtasks.put(taskFromFile.getId(), subtask);
                             fb.epics.get(subtask.getIdEpic()).getEpicsSubtasksId().add(subtask.getId());
+                            fb.prioritizedTasks.add(subtask);
                             break;
                         case EPIC:
                             fb.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
@@ -159,7 +157,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return fb;
     }
 
-    private void save() {
+    public void save() {
         List<String> convertedTasksToLines = convertTaskToLines(); // вынес в отдельный метод
 
         try(Writer writer = new FileWriter(file)) {

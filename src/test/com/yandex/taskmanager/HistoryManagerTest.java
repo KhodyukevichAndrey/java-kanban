@@ -1,9 +1,11 @@
-package testapi.com.yandex.taskmanager;
+package com.yandex.taskmanager;
 
-import com.yandex.taskmanagerapp.model.*;
-import com.yandex.taskmanagerapp.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import com.yandex.taskmanagerapp.model.Statuses;
+import com.yandex.taskmanagerapp.model.Task;
+import com.yandex.taskmanagerapp.service.HistoryManager;
+import com.yandex.taskmanagerapp.service.Managers;
 
 import java.util.List;
 
