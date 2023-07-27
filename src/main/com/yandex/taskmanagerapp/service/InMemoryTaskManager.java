@@ -17,7 +17,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Subtask> subtasks = new HashMap<>();
     protected final Map<Integer, Epic> epics = new HashMap<>();
 
-    Comparator<Task> comparator = (o1, o2) -> {
+    protected final Comparator<Task> comparator = (o1, o2) -> {
         LocalDateTime first = o1.getStartTime();
         LocalDateTime second = o2.getStartTime();
         if (first != null && second != null) {

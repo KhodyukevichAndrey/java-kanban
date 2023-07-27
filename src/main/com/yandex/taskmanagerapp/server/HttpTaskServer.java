@@ -6,10 +6,10 @@ import com.sun.net.httpserver.HttpServer;
 import com.yandex.taskmanagerapp.model.Epic;
 import com.yandex.taskmanagerapp.model.Subtask;
 import com.yandex.taskmanagerapp.model.Task;
+import com.yandex.taskmanagerapp.service.Managers;
 import com.yandex.taskmanagerapp.service.TaskManager;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -19,11 +19,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HttpTaskServer {
 
-    HttpServer server;
+    private final HttpServer server;
     private static final int PORT = 8080;
 
     private final TaskManager httpTaskManager;
-    private final Gson gson = new Gson();
+    private final Gson gson = Managers.getGson();
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
@@ -42,7 +42,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/task/$", path)) {
                         String response = gson.toJson(httpTaskManager.getAllTask());
                         if(response.isEmpty()) {
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         sendText(httpExchange, response);
                         break;
@@ -58,7 +58,7 @@ public class HttpTaskServer {
                         } else {
                             System.out.println("Задача с указанным ID не найдена " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -66,7 +66,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/subtask/$", path)) {
                         String response = gson.toJson(httpTaskManager.getAllSubtask());
                         if(response.isEmpty()) {
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         sendText(httpExchange, response);
                         break;
@@ -82,7 +82,7 @@ public class HttpTaskServer {
                         } else {
                             System.out.println("Подзадача с указанным ID не найдена " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -90,7 +90,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/epic/$", path)) {
                         String response = gson.toJson(httpTaskManager.getAllEpics());
                         if(response.isEmpty()) {
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         sendText(httpExchange, response);
                         break;
@@ -106,7 +106,7 @@ public class HttpTaskServer {
                         } else {
                             System.out.println("Эпик с указанным ID не найден " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -121,7 +121,7 @@ public class HttpTaskServer {
                         } else {
                             System.out.println("Эпик с указанным ID не найден " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -129,7 +129,7 @@ public class HttpTaskServer {
                     if(Pattern.matches("^/tasks/history/", path)) {
                         String response = gson.toJson(httpTaskManager.getHistory());
                         if(response.isEmpty()) {
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         sendText(httpExchange, response);
                         break;
@@ -138,7 +138,7 @@ public class HttpTaskServer {
                     if(Pattern.matches("^/tasks/$", path)) {
                         String response = gson.toJson(httpTaskManager.getPriorityTasks());
                         if(response.isEmpty()) {
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         sendText(httpExchange, response);
                         break;
@@ -146,8 +146,12 @@ public class HttpTaskServer {
                     break;
 
                 case "POST":
-                    InputStream inputStream = httpExchange.getRequestBody();
-                    String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+                    String body = readText(httpExchange);
+
+                    if(body.isEmpty()) {
+                        httpExchange.sendResponseHeaders(400, 0);
+                        return;
+                    }
 
                     if (Pattern.matches("/tasks/task/$", path)) {
                         Task currentTask = gson.fromJson(body, Task.class);
@@ -199,7 +203,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/task/$", path)) {
                         httpTaskManager.deleteAllTask();
                         System.out.println("Задачи успешно удалены");
-                        httpExchange.sendResponseHeaders(200, 0);
+                        httpExchange.sendResponseHeaders(204, 0);
                         break;
                     }
 
@@ -209,11 +213,11 @@ public class HttpTaskServer {
                         Task task = httpTaskManager.getTaskById(id);
                         if (id != -1 && task != null) {
                             httpTaskManager.deleteTaskById(id);
-                            httpExchange.sendResponseHeaders(200, 0);
+                            httpExchange.sendResponseHeaders(204, 0);
                         } else {
                             System.out.println("Задача с указанным ID не найдена " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -221,7 +225,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/subtask/$", path)) {
                         httpTaskManager.deleteAllSubtask();
                         System.out.println("Подзадачи успешно удалены");
-                        httpExchange.sendResponseHeaders(200, 0);
+                        httpExchange.sendResponseHeaders(204, 0);
                         break;
                     }
 
@@ -231,11 +235,11 @@ public class HttpTaskServer {
                         Subtask subtask = httpTaskManager.getSubtaskById(id);
                         if (id != -1 && subtask != null) {
                             httpTaskManager.deleteSubtaskById(id);
-                            httpExchange.sendResponseHeaders(200, 0);
+                            httpExchange.sendResponseHeaders(204, 0);
                         } else {
                             System.out.println("Подзадача с указанным ID не найдена " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -243,7 +247,7 @@ public class HttpTaskServer {
                     if (Pattern.matches("^/tasks/epic/$", path)) {
                         httpTaskManager.deleteAllEpics();
                         System.out.println("Эпики успешно удалены");
-                        httpExchange.sendResponseHeaders(200, 0);
+                        httpExchange.sendResponseHeaders(204, 0);
                         break;
                     }
 
@@ -253,11 +257,11 @@ public class HttpTaskServer {
                         Epic epic = httpTaskManager.getEpicById(id);
                         if (id != -1 && epic != null) {
                             httpTaskManager.deleteEpicById(id);
-                            httpExchange.sendResponseHeaders(200, 0);
+                            httpExchange.sendResponseHeaders(204, 0);
                         } else {
                             System.out.println("Эпик с указанным ID не найден " +
                                     "или введен некорректный {id=" + pathId + "}");
-                            httpExchange.sendResponseHeaders(405, 0);
+                            httpExchange.sendResponseHeaders(404, 0);
                         }
                         break;
                     }
@@ -299,5 +303,9 @@ public class HttpTaskServer {
         } catch (NumberFormatException exception) {
             return -1;
         }
+    }
+
+    private String readText(HttpExchange h) throws IOException {
+        return new String(h.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
     }
 }

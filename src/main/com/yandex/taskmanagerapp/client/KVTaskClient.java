@@ -1,7 +1,8 @@
 package com.yandex.taskmanagerapp.client;
 
-import com.google.gson.Gson;
+import com.yandex.taskmanagerapp.exceptions.ManagerSaveException;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,23 +11,13 @@ import java.net.http.HttpResponse;
 public class KVTaskClient {
 
     private final URI url;
-    HttpClient httpClient;
-
-    private String apiTokenOfClient;
-    Gson gson;
+    private final HttpClient httpClient;
+    private final String apiTokenOfClient;
 
     public KVTaskClient(URI url) {
         this.url = url;
         httpClient = HttpClient.newHttpClient();
-        gson = new Gson();
-        try {
-            URI uriForToken = URI.create(url + "/register");
-            HttpRequest request = HttpRequest.newBuilder().uri(uriForToken).GET().build();
-            HttpResponse response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            apiTokenOfClient = response.body().toString();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        apiTokenOfClient = registerToken(url);
     }
 
     public void put(String key, String json) {
@@ -34,33 +25,43 @@ public class KVTaskClient {
             URI urlForSave = URI.create(url + "/save/" + key + "?API_TOKEN=" + apiTokenOfClient);
             HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
             HttpRequest request = HttpRequest.newBuilder().uri(urlForSave).POST(body).build();
-            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            HttpResponse response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            if(response.statusCode() != 200) {
+                throw new ManagerSaveException("Не удалось сохранить данные на сервере. " +
+                        "Ошибка " + response.statusCode());
+            }
+        } catch (IOException | InterruptedException exception) {
+            throw new ManagerSaveException("Не удалось отправить запрос на сервер");
         }
     }
 
     public String load (String key) {
-        HttpResponse<String> response = null;
         try {
             URI urlForLoad = URI.create(url + "/load/" + key + "?API_TOKEN=" + apiTokenOfClient);
             HttpRequest request = HttpRequest.newBuilder().uri(urlForLoad).GET().build();
-            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() != 200) {
+                throw new ManagerSaveException("Не удалось загрузить полученные данные от сервера." +
+                        " Ошибка " + response.statusCode());
+            }
+            return response.body();
+        } catch (IOException | InterruptedException exception) {
+            throw new ManagerSaveException("Не удалось отправить запрос на сервер");
         }
-        if(response == null) {
-            String noValue = "Токен в базе сервера не найден";
-            return noValue;
-        }
-        return response.body();
     }
 
-    public String getApiTokenOfClient() { //для тестов
-        return apiTokenOfClient;
-    }
-
-    public void setApiTokenOfClient(String apiTokenOfClient) {
-        this.apiTokenOfClient = apiTokenOfClient;
+    private String registerToken(URI url) {
+        try {
+            URI uriForToken = URI.create(url + "/register");
+            HttpRequest request = HttpRequest.newBuilder().uri(uriForToken).GET().build();
+            HttpResponse response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() != 200) {
+                throw new ManagerSaveException("Не удалось зарегестрировать токен на сервере. " +
+                        "Ошибка сервера " + response.statusCode());
+            }
+            return response.body().toString();
+        } catch (IOException | InterruptedException exception) {
+            throw new ManagerSaveException("Не удалось отправить запрос на сервер");
+        }
     }
 }

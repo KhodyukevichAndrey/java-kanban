@@ -45,14 +45,19 @@ public class KVServer {
                     return;
                 }
                 String value = data.get(key);
-                if(value.isEmpty()) {
-                    System.out.println("Value для загрузки пустое");
-                    h.sendResponseHeaders(400, 0);
-                    return;
+                if(value != null) {
+                    if (value.isEmpty()) {
+                        System.out.println("Value для загрузки пустое");
+                        h.sendResponseHeaders(404, 0);
+                        return;
+                    }
+                    sendText(h, value);
+                    System.out.println("Значение Value успешно отправлено");
+                    h.sendResponseHeaders(200, 0);
+                } else {
+                    System.out.println("Значение Value по указанному ключу не найдено");
+                    h.sendResponseHeaders(404,0);
                 }
-                sendText(h, value);
-                System.out.println("Значение Value успешно отправлено");
-                h.sendResponseHeaders(200,0);
             } else {
                 System.out.println("/load ждёт GET-запрос, а получил: " + h.getRequestMethod());
                 h.sendResponseHeaders(405, 0);
